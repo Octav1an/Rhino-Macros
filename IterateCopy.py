@@ -6,7 +6,7 @@ import Rhino
 def iterateCopy():
     obj_ref = rs.GetObjects("Select objects to create a iteration", 0, True, True)
     nrObjIteration = rs.GetInteger("Object iteration count", 1)
-    if obj_ref is None: return
+    if obj_ref is None or nrObjIteration is None: return
     ###Creating the bounding box of the objects
     boxCorners = rs.BoundingBox(obj_ref)
     in_ptbase = boxCorners[0]
@@ -22,9 +22,13 @@ def iterateCopy():
         else:
             final_dist = dist2 * 2
     else: return
-    
+    """
+    str_input = rs.GetString("Type description")
+    #str_final_splited = add_text(final_dist, str_input)
+    #print(str_final_splited)
+    """
     allLayers = rs.LayerNames()
-    print(allLayers[1])
+    #print(allLayers[1])
     ###Boolean execute once and if False
     bll_once = False
     ###Making sure we dont repeat ITERATE parent layer 
@@ -58,6 +62,23 @@ def iterateCopy():
     obj_iteration = rs.CopyObjects(obj_ref, ((float(distParent) * \
     (int(nrIterateChild) - int(I_count))), 0, 0))
     rs.ObjectLayer(obj_iteration, strLayer)
+
+
+def add_text(dist, str_input):
+    ### dist - distance between objects iterated
+    int_step = 10 #!!!
+    ### Create and asign variable to be None
+    str_splited = None
+    print(int(round(len(str_input)/int_step)))
+    
+    for i in range(0, int(round(len(str_input)/int_step))):
+        str_splited = str_input[i*10:(i*10) + int_step]
+        print(str_splited)
+    if str_splited is None:
+        return
+    else:
+        return str_splited
+        
 
 
 
