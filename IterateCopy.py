@@ -1,5 +1,4 @@
 import rhinoscriptsyntax as rs
-import myFunctions as mf
 import Rhino
 
 
