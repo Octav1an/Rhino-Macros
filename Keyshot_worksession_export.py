@@ -12,6 +12,9 @@ import scriptcontext as sc
 import Rhino
 
 
+## 'general_parent' = The main layer everything will be copied to.
+general_parent = 'To_Active_Keyshot'
+
 def prepere_for_export():
     """
     Method that prepares the objects for export to keyshot. (Copies objs to
@@ -24,7 +27,6 @@ def prepere_for_export():
     str_message = "Select the geometry to export to Keyshot."
     coll_obj = rs.GetObjects(str_message, 0, True, True)
     if not coll_obj: return
-    
     for obj_item in coll_obj:
         layer_object = rs.ObjectLayer(obj_item)
         coll_split_layer_name = layer_object.split('::')
@@ -34,8 +36,6 @@ def prepere_for_export():
         if '.3dm' in first_layer_name:
             ## Remove the file_name.3dm
             layer_3dm = coll_split_layer_name.pop(0)
-            ## 'general_parent' = The main layer everything will be copied to.
-            general_parent = 'To_Active'
             dup_layer(coll_split_layer_name[:], rs.AddLayer(general_parent), 
                                                             obj_item)
             coll_new_path_layer = coll_split_layer_name[:]
@@ -45,8 +45,9 @@ def prepere_for_export():
             active_obj = copy_object_to_layer(obj_item, str_new_path_layer)
             coll_dup_objects.append(active_obj)
             
-    ## Colapse the layer 'To_Active'
-    rs.ExpandLayer('To_Active', False)
+    ## Check if the layer exists and colapse the layer 'general_parent' which
+    ## is the layer all worksession geo is copied ecxept the active fils's geo.
+    if rs.IsLayer(general_parent): rs.ExpandLayer(general_parent, False)
     return coll_dup_objects
 
 
@@ -104,10 +105,11 @@ def export_to_keyshot(bool_export, coll_objs):
     if not bool_export:
         print("Turn on bool_export")
         return
-    rc = rs.Command('_RunKeyShot6')
-    if not rc: return
-    else: 
-        clean_up(rc, coll_objs)
+    elif coll_objs is not None:
+        rc = rs.Command('_RunKeyShot6')
+        if not rc: return
+        else: 
+            clean_up(rc, coll_objs)
     
 
 def clean_up(bool_run, coll_objs):
@@ -119,16 +121,24 @@ def clean_up(bool_run, coll_objs):
     Returns:
         True if it succesfull, False if fails.
     """
-    purge_layer = "To_Active"
+    purge_layer = general_parent
     if not bool_run: return False
-    elif purge_layer:
+    elif rs.IsLayer(purge_layer):
         rc = rs.DeleteObjects(coll_objs)
         print("Removing {} objects".format(rc))
         rc = rs.DeleteLayer(purge_layer)
         print("Removing \'{}\' layer".format(purge_layer))
     return True
 
+def print_result_info(coll_objs):
+    if coll_objs is not None:
+        print("{} objects were exported to Keyshot".format(len(coll_objs)))
+    else:
+        print("No Worksession found!!!")
+        return
+
 
 if __name__ == "__main__":
     objs_created = prepere_for_export()
+    print_result_info(objs_created)
     export_to_keyshot(True, objs_created)
