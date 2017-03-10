@@ -131,5 +131,5 @@ def print_result_info(coll_objs):
 
 
 if __name__ == "__main__":
-    objs_created = prepere_for_export()
+    objs_created = prepere_for_duplicating()
     print_result_info(objs_created)
